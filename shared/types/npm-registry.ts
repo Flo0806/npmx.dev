@@ -37,8 +37,17 @@ export interface SlimPackument {
   'keywords'?: string[]
   'repository'?: { type?: string; url?: string; directory?: string }
   'bugs'?: { url?: string; email?: string }
-  /** Only includes dist-tag versions */
-  'versions': Record<string, import('@npm/types').PackumentVersion>
+  /** Only includes dist-tag versions (with installScripts info added per version) */
+  'versions': Record<
+    string,
+    import('@npm/types').PackumentVersion & {
+      /** Install scripts info (preinstall, install, postinstall) */
+      installScripts?: {
+        scripts: ('preinstall' | 'install' | 'postinstall')[]
+        npxDependencies: Record<string, string>
+      }
+    }
+  >
 }
 
 /**
