@@ -7,6 +7,7 @@ const props = defineProps<{
 }>()
 
 const isVisible = ref(false)
+const tooltipId = useId()
 
 const positionClasses: Record<string, string> = {
   top: 'bottom-full left-1/2 -translate-x-1/2 mb-1',
@@ -16,26 +17,36 @@ const positionClasses: Record<string, string> = {
 }
 
 const tooltipPosition = computed(() => positionClasses[props.position || 'bottom'])
+
+function show() {
+  isVisible.value = true
+}
+
+function hide() {
+  isVisible.value = false
+}
 </script>
 
 <template>
   <div
     class="relative inline-flex"
-    @mouseenter="isVisible = true"
-    @mouseleave="isVisible = false"
-    @focus="isVisible = true"
-    @blur="isVisible = false"
+    :aria-describedby="isVisible ? tooltipId : undefined"
+    @mouseenter="show"
+    @mouseleave="hide"
+    @focusin="show"
+    @focusout="hide"
   >
     <slot />
 
     <Transition
-      enter-active-class="transition-opacity duration-150"
-      leave-active-class="transition-opacity duration-100"
+      enter-active-class="transition-opacity duration-150 motion-reduce:transition-none"
+      leave-active-class="transition-opacity duration-100 motion-reduce:transition-none"
       enter-from-class="opacity-0"
       leave-to-class="opacity-0"
     >
       <div
         v-if="isVisible"
+        :id="tooltipId"
         role="tooltip"
         class="absolute px-2 py-1 font-mono text-xs text-fg bg-bg-elevated border border-border rounded shadow-lg whitespace-nowrap z-[100] pointer-events-none"
         :class="tooltipPosition"
