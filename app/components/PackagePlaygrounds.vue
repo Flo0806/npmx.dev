@@ -143,7 +143,7 @@ function focusMenuItem(index: number) {
       >
         <span class="flex items-center gap-2">
           <span class="i-carbon-play w-4 h-4 shrink-0 text-fg-muted" aria-hidden="true" />
-          <span class="text-fg-muted">{{ links.length }} Playgrounds</span>
+          <span class="text-fg-muted">choose playground ({{ links.length }})</span>
         </span>
         <span
           class="i-carbon-chevron-down w-3 h-3 text-fg-subtle transition-transform duration-200 motion-reduce:transition-none"
