@@ -1,7 +1,7 @@
 import { marked, type Tokens } from 'marked'
 import sanitizeHtml from 'sanitize-html'
 import { hasProtocol, withoutTrailingSlash } from 'ufo'
-import { ReadmeResponse } from '#shared/types/readme.js'
+import type { ReadmeResponse } from '#shared/types/readme.js'
 
 /**
  * Playground provider configuration
