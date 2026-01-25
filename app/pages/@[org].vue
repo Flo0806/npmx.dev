@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { formatNumber } from '#imports'
+import { debounce } from 'perfect-debounce'
 
 definePageMeta({
   name: 'org',
@@ -7,27 +8,85 @@ definePageMeta({
 })
 
 const route = useRoute('org')
+const router = useRouter()
 
 const orgName = computed(() => route.params.org)
 
 const { isConnected } = useConnector()
 
-// Search for packages in this org's scope (@orgname/*)
-const searchQuery = computed(() => `@${orgName.value}`)
+// Debounced URL update for filter/sort
+const updateUrl = debounce((updates: { filter?: string; sort?: string }) => {
+  router.replace({
+    query: {
+      ...route.query,
+      q: updates.filter || undefined,
+      sort: updates.sort && updates.sort !== 'downloads' ? updates.sort : undefined,
+    },
+  })
+}, 300)
 
-const { data: results, status, error } = useNpmSearch(searchQuery, { size: 250 })
+type SortOption = 'downloads' | 'updated' | 'name-asc' | 'name-desc'
 
-// Filter to only include packages that are actually in this scope
-// (search may return packages that just mention the org name)
-const scopedPackages = computed(() => {
-  if (!results.value?.objects) return []
-  const scopePrefix = `@${orgName.value}/`
-  return results.value.objects
-    .filter(obj => obj.package.name.startsWith(scopePrefix))
-    .sort((a, b) => b.searchScore - a.searchScore)
+// Filter and sort state (from URL)
+const filterText = ref((route.query.q as string) ?? '')
+const sortOption = ref<SortOption>((route.query.sort as SortOption) || 'downloads')
+
+// Update URL when filter/sort changes (debounced)
+watch([filterText, sortOption], ([filter, sort]) => {
+  updateUrl({ filter, sort })
 })
 
-const packageCount = computed(() => scopedPackages.value.length)
+// Fetch all packages in this org using the org packages API
+const { data: results, status, error } = useOrgPackages(orgName)
+
+const packages = computed(() => results.value?.objects ?? [])
+const packageCount = computed(() => packages.value.length)
+
+// Apply client-side filter and sort
+const filteredAndSortedPackages = computed(() => {
+  let pkgs = [...packages.value]
+
+  // Apply text filter
+  if (filterText.value) {
+    const search = filterText.value.toLowerCase()
+    pkgs = pkgs.filter(
+      pkg =>
+        pkg.package.name.toLowerCase().includes(search) ||
+        pkg.package.description?.toLowerCase().includes(search),
+    )
+  }
+
+  // Apply sort
+  switch (sortOption.value) {
+    case 'updated':
+      pkgs.sort((a, b) => {
+        const dateA = a.updated || a.package.date || ''
+        const dateB = b.updated || b.package.date || ''
+        return dateB.localeCompare(dateA)
+      })
+      break
+    case 'name-asc':
+      pkgs.sort((a, b) => a.package.name.localeCompare(b.package.name))
+      break
+    case 'name-desc':
+      pkgs.sort((a, b) => b.package.name.localeCompare(a.package.name))
+      break
+    case 'downloads':
+    default:
+      pkgs.sort((a, b) => (b.downloads?.weekly ?? 0) - (a.downloads?.weekly ?? 0))
+      break
+  }
+
+  return pkgs
+})
+
+const filteredCount = computed(() => filteredAndSortedPackages.value.length)
+
+// Reset state when org changes
+watch(orgName, () => {
+  filterText.value = ''
+  sortOption.value = 'downloads'
+})
 
 const activeTab = ref<'members' | 'teams'>('members')
 
@@ -45,8 +104,7 @@ useSeoMeta({
 
 defineOgImageComponent('Default', {
   title: () => `@${orgName.value}`,
-  description: () =>
-    scopedPackages.value.length ? `${scopedPackages.value.length} packages` : 'npm organization',
+  description: () => (packageCount.value ? `${packageCount.value} packages` : 'npm organization'),
 })
 </script>
 
@@ -145,10 +203,28 @@ defineOgImageComponent('Default', {
     </div>
 
     <!-- Package list -->
-    <section v-else-if="scopedPackages.length > 0" aria-label="Organization packages">
+    <section v-else-if="packages.length > 0" aria-label="Organization packages">
       <h2 class="text-xs text-fg-subtle uppercase tracking-wider mb-4">Packages</h2>
 
-      <PackageList :results="scopedPackages" />
+      <!-- Filter and sort controls -->
+      <PackageListControls
+        v-model:filter="filterText"
+        v-model:sort="sortOption"
+        :placeholder="`Filter ${packageCount} packages...`"
+        :total-count="packageCount"
+        :filtered-count="filteredCount"
+      />
+
+      <!-- No results after filtering -->
+      <p
+        v-if="filteredAndSortedPackages.length === 0"
+        class="text-fg-muted py-8 text-center font-mono"
+      >
+        No packages match "<span class="text-fg">{{ filterText }}</span
+        >"
+      </p>
+
+      <PackageList v-else :results="filteredAndSortedPackages" />
     </section>
   </main>
 </template>
