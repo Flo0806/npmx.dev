@@ -7,6 +7,8 @@
  * Also extracts npx package calls from those scripts.
  */
 
+import type { InstallScriptsInfo } from '#shared/types'
+
 // Scripts that run when installing a package as a dependency
 const INSTALL_SCRIPTS = new Set(['preinstall', 'install', 'postinstall'])
 
@@ -80,15 +82,6 @@ function isBuiltinCommand(name: string): boolean {
     'shell',
   ])
   return builtins.has(name)
-}
-
-export interface InstallScriptsInfo {
-  /** Which install scripts are present */
-  scripts: ('preinstall' | 'install' | 'postinstall')[]
-  /** The actual script content for each install script */
-  content: Record<string, string>
-  /** npx packages called in those scripts */
-  npxDependencies: Record<string, string>
 }
 
 /**
