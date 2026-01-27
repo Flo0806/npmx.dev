@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { OsvSeverityLevel, PackageVulnerabilities } from '#shared/types'
+import type { PackageVulnerabilities } from '#shared/types'
+import { SEVERITY_COLORS, SEVERITY_BADGE_COLORS, getHighestSeverity } from '#shared/utils/severity'
 
 const props = defineProps<{
   packageName: string
@@ -38,39 +39,11 @@ const { data: vulnData, status } = useLazyAsyncData(
 )
 
 const hasVulnerabilities = computed(() => vulnData.value.counts.total > 0)
-
-// Severity color classes for the banner
-const severityColors: Record<OsvSeverityLevel, string> = {
-  critical: 'text-red-400 bg-red-500/10 border-red-500/30',
-  high: 'text-orange-400 bg-orange-500/10 border-orange-500/30',
-  moderate: 'text-yellow-400 bg-yellow-500/10 border-yellow-500/30',
-  low: 'text-blue-400 bg-blue-500/10 border-blue-500/30',
-  unknown: 'text-fg-muted bg-bg-subtle border-border',
-}
-
-// Severity badge styles - greyscale theme matching the design system
-const severityBadgeColors: Record<OsvSeverityLevel, string> = {
-  critical: 'bg-bg-muted border border-border text-fg',
-  high: 'bg-bg-muted border border-border text-fg-muted',
-  moderate: 'bg-bg-muted border border-border text-fg-muted',
-  low: 'bg-bg-muted border border-border text-fg-subtle',
-  unknown: 'bg-bg-muted border border-border text-fg-subtle',
-}
-
-// Expand/collapse state
 const isExpanded = shallowRef(false)
+const highestSeverity = computed(() => getHighestSeverity(vulnData.value.counts))
 
-// Get highest severity for banner color
-const highestSeverity = computed<OsvSeverityLevel>(() => {
-  const counts = vulnData.value.counts
-  if (counts.critical > 0) return 'critical'
-  if (counts.high > 0) return 'high'
-  if (counts.moderate > 0) return 'moderate'
-  if (counts.low > 0) return 'low'
-  return 'unknown'
-})
+const { $t } = useNuxtApp()
 
-// Summary text for collapsed view
 const summaryText = computed(() => {
   const counts = vulnData.value.counts
   const parts: string[] = []
@@ -90,7 +63,7 @@ const summaryText = computed(() => {
     <div
       role="alert"
       class="rounded-lg border overflow-hidden"
-      :class="severityColors[highestSeverity]"
+      :class="SEVERITY_COLORS[highestSeverity]"
     >
       <!-- Header (always visible, clickable to expand) -->
       <button
@@ -147,7 +120,7 @@ const summaryText = computed(() => {
                   </a>
                   <span
                     class="px-2 py-0.5 text-xs font-mono rounded"
-                    :class="severityBadgeColors[vuln.severity]"
+                    :class="SEVERITY_BADGE_COLORS[vuln.severity]"
                   >
                     {{ vuln.severity }}
                   </span>

@@ -1,10 +1,11 @@
-import type { PackageVulnerabilities, OsvSeverityLevel } from '#shared/types'
+import type { PackageVulnerabilities } from '#shared/types'
 import { maxSatisfying, prerelease } from 'semver'
 import {
   fetchCachedPackument,
   constraintIncludesPrerelease,
   isNonSemverConstraint,
 } from './useNpmRegistry'
+import { SEVERITY_TEXT_COLORS, getHighestSeverity } from '#shared/utils/severity'
 
 interface ResolvedPackage {
   name: string
@@ -128,26 +129,8 @@ export function getVulnerabilityTooltip(info: PackageVulnerabilities): string {
 }
 
 /**
- * Get highest severity from a PackageVulnerabilities
- */
-export function getHighestSeverity(info: PackageVulnerabilities): OsvSeverityLevel {
-  if (info.counts.critical > 0) return 'critical'
-  if (info.counts.high > 0) return 'high'
-  if (info.counts.moderate > 0) return 'moderate'
-  if (info.counts.low > 0) return 'low'
-  return 'unknown'
-}
-
-/**
  * Get CSS class for vulnerability severity
  */
 export function getVulnerabilitySeverityClass(info: PackageVulnerabilities): string {
-  const severityClasses: Record<OsvSeverityLevel, string> = {
-    critical: 'text-red-500',
-    high: 'text-orange-500',
-    moderate: 'text-yellow-500',
-    low: 'text-blue-500',
-    unknown: 'text-fg-subtle',
-  }
-  return severityClasses[getHighestSeverity(info)]
+  return SEVERITY_TEXT_COLORS[getHighestSeverity(info.counts)]
 }

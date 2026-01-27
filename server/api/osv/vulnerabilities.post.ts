@@ -22,7 +22,7 @@ interface VulnerabilitiesResponse {
  * POST /api/osv/vulnerabilities
  * Body: { packages: [{ name: "lodash", version: "4.17.21" }, ...] }
  *
- * @returns { results: { "lodash": { count: 2, severity: "high", ... }, ... } }
+ * @returns { results: { "lodash": { package, version, vulnerabilities, counts }, ... } }
  */
 export default defineCachedEventHandler<Promise<VulnerabilitiesResponse>>(
   async event => {

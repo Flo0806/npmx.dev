@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { SEVERITY_LEVELS } from '~~/shared/types'
+import { SEVERITY_COLORS } from '~~/shared/utils/severity'
 
 const props = defineProps<{
   packageName: string
@@ -84,15 +85,7 @@ const vulnBreakdownText = computed(() => {
       v-if="vulnerabilitySummary"
       role="alert"
       class="rounded-lg border px-4 py-3 cursor-help"
-      :class="{
-        'border-red-500/30 bg-red-500/10 text-red-400':
-          vulnerabilitySummary.severity === 'critical',
-        'border-orange-500/30 bg-orange-500/10 text-orange-400':
-          vulnerabilitySummary.severity === 'high',
-        'border-yellow-500/30 bg-yellow-500/10 text-yellow-400':
-          vulnerabilitySummary.severity === 'moderate',
-        'border-blue-500/30 bg-blue-500/10 text-blue-400': vulnerabilitySummary.severity === 'low',
-      }"
+      :class="SEVERITY_COLORS[vulnerabilitySummary.severity]"
       :title="`${vulnerabilitySummary.affectedDeps} ${vulnerabilitySummary.affectedDeps === 1 ? 'dependency' : 'dependencies'} affected`"
     >
       <div class="flex items-center gap-2">
