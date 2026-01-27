@@ -4,9 +4,19 @@
  */
 
 /**
+ * Severity levels in priority order (highest first)
+ */
+export const SEVERITY_LEVELS = ['critical', 'high', 'moderate', 'low'] as const
+
+/**
  * Severity level derived from CVSS score
  */
-export type OsvSeverityLevel = 'critical' | 'high' | 'moderate' | 'low' | 'unknown'
+export type OsvSeverityLevel = (typeof SEVERITY_LEVELS)[number] | 'unknown'
+
+/**
+ * Counts by severity level
+ */
+export type SeverityCounts = Record<(typeof SEVERITY_LEVELS)[number], number>
 
 /**
  * CVSS severity information from OSV
@@ -70,11 +80,5 @@ export interface PackageVulnerabilities {
   package: string
   version: string
   vulnerabilities: VulnerabilitySummary[]
-  counts: {
-    total: number
-    critical: number
-    high: number
-    moderate: number
-    low: number
-  }
+  counts: SeverityCounts & { total: number }
 }

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { SEVERITY_LEVELS } from '~~/shared/types'
+
 const props = defineProps<{
   packageName: string
   dependencies?: Record<string, string>
@@ -9,6 +11,9 @@ const props = defineProps<{
 
 // Fetch outdated info for dependencies
 const outdatedDeps = useOutdatedDependencies(() => props.dependencies)
+
+// Fetch vulnerability info for dependencies
+const vulnerableDeps = useVulnerableDependencies(() => props.dependencies)
 
 // Expanded state for each section
 const depsExpanded = shallowRef(false)
@@ -43,10 +48,65 @@ const sortedOptionalDependencies = computed(() => {
   if (!props.optionalDependencies) return []
   return Object.entries(props.optionalDependencies).sort(([a], [b]) => a.localeCompare(b))
 })
+
+// Vulnerability summary for banner
+const vulnerabilitySummary = computed(() => {
+  const deps = Object.values(vulnerableDeps.value)
+  if (deps.length === 0) return null
+
+  const counts = { critical: 0, high: 0, moderate: 0, low: 0 }
+  let total = 0
+
+  for (const info of deps) {
+    if (!info?.counts) continue
+    total += info.counts.total || 0
+    for (const s of SEVERITY_LEVELS) counts[s] += info.counts[s] || 0
+  }
+
+  const severity = SEVERITY_LEVELS.find(s => counts[s] > 0) || 'low'
+
+  return { affectedDeps: deps.length, totalVulns: total, severity, counts }
+})
+
+const vulnBreakdownText = computed(() => {
+  if (!vulnerabilitySummary.value) return ''
+  const { counts } = vulnerabilitySummary.value
+  return SEVERITY_LEVELS.filter(s => counts[s])
+    .map(s => `${counts[s]} ${s}`)
+    .join(', ')
+})
 </script>
 
 <template>
   <div class="space-y-8">
+    <!-- Vulnerability warning banner -->
+    <div
+      v-if="vulnerabilitySummary"
+      role="alert"
+      class="rounded-lg border px-4 py-3 cursor-help"
+      :class="{
+        'border-red-500/30 bg-red-500/10 text-red-400':
+          vulnerabilitySummary.severity === 'critical',
+        'border-orange-500/30 bg-orange-500/10 text-orange-400':
+          vulnerabilitySummary.severity === 'high',
+        'border-yellow-500/30 bg-yellow-500/10 text-yellow-400':
+          vulnerabilitySummary.severity === 'moderate',
+        'border-blue-500/30 bg-blue-500/10 text-blue-400': vulnerabilitySummary.severity === 'low',
+      }"
+      :title="`${vulnerabilitySummary.affectedDeps} ${vulnerabilitySummary.affectedDeps === 1 ? 'dependency' : 'dependencies'} affected`"
+    >
+      <div class="flex items-center gap-2">
+        <span class="i-carbon-security w-4 h-4 shrink-0" aria-hidden="true" />
+        <div>
+          <div class="font-mono text-sm">
+            {{ vulnerabilitySummary.totalVulns }}
+            {{ vulnerabilitySummary.totalVulns === 1 ? 'vulnerability' : 'vulnerabilities' }}
+          </div>
+          <div class="font-mono text-xs opacity-70">{{ vulnBreakdownText }}</div>
+        </div>
+      </div>
+    </div>
+
     <!-- Dependencies -->
     <section v-if="sortedDependencies.length > 0" aria-labelledby="dependencies-heading">
       <h2 id="dependencies-heading" class="text-xs text-fg-subtle uppercase tracking-wider mb-3">
@@ -75,6 +135,19 @@ const sortedOptionalDependencies = computed(() => {
               <span class="i-carbon-warning-alt w-3 h-3 block" />
             </span>
             <NuxtLink
+              v-if="vulnerableDeps[dep]?.version"
+              :to="{
+                name: 'package',
+                params: { package: [...dep.split('/'), 'v', vulnerableDeps[dep].version] },
+              }"
+              class="shrink-0"
+              :class="getVulnerabilitySeverityClass(vulnerableDeps[dep])"
+              :title="getVulnerabilityTooltip(vulnerableDeps[dep])"
+            >
+              <span class="i-carbon-security w-3 h-3 block" aria-hidden="true" />
+              <span class="sr-only">View vulnerabilities</span>
+            </NuxtLink>
+            <NuxtLink
               :to="{ name: 'package', params: { package: [...dep.split('/'), 'v', version] } }"
               class="font-mono text-xs text-right truncate"
               :class="getVersionClass(outdatedDeps[dep])"
@@ -84,6 +157,9 @@ const sortedOptionalDependencies = computed(() => {
             </NuxtLink>
             <span v-if="outdatedDeps[dep]" class="sr-only">
               ({{ getOutdatedTooltip(outdatedDeps[dep]) }})
+            </span>
+            <span v-if="vulnerableDeps[dep]" class="sr-only">
+              ({{ getVulnerabilityTooltip(vulnerableDeps[dep]) }})
             </span>
           </span>
         </li>

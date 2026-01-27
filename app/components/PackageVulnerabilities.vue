@@ -1,10 +1,5 @@
 <script setup lang="ts">
-import type {
-  OsvQueryResponse,
-  OsvVulnerability,
-  OsvSeverityLevel,
-  VulnerabilitySummary,
-} from '#shared/types'
+import type { OsvSeverityLevel, PackageVulnerabilities } from '#shared/types'
 
 const props = defineProps<{
   packageName: string
@@ -14,93 +9,33 @@ const props = defineProps<{
 const { data: vulnData, status } = useLazyAsyncData(
   `osv-${props.packageName}@${props.version}`,
   async () => {
-    const response = await $fetch<OsvQueryResponse>('https://api.osv.dev/v1/query', {
-      method: 'POST',
-      body: {
-        package: {
-          name: props.packageName,
-          ecosystem: 'npm',
+    const response = await $fetch<{ results: Record<string, PackageVulnerabilities> }>(
+      '/api/osv/vulnerabilities',
+      {
+        method: 'POST',
+        body: {
+          packages: [{ name: props.packageName, version: props.version }],
         },
-        version: props.version,
       },
-    })
+    )
 
-    const vulns = response.vulns || []
-    const vulnerabilities = vulns.map(toVulnerabilitySummary)
-
-    // Sort by severity (critical first)
-    const severityOrder: Record<OsvSeverityLevel, number> = {
-      critical: 0,
-      high: 1,
-      moderate: 2,
-      low: 3,
-      unknown: 4,
-    }
-    vulnerabilities.sort((a, b) => severityOrder[a.severity] - severityOrder[b.severity])
-
-    // Count by severity
-    const counts = { total: vulnerabilities.length, critical: 0, high: 0, moderate: 0, low: 0 }
-    for (const v of vulnerabilities) {
-      if (v.severity === 'critical') counts.critical++
-      else if (v.severity === 'high') counts.high++
-      else if (v.severity === 'moderate') counts.moderate++
-      else if (v.severity === 'low') counts.low++
+    const result = response.results[props.packageName]
+    if (!result) {
+      return {
+        vulnerabilities: [],
+        counts: { total: 0, critical: 0, high: 0, moderate: 0, low: 0 },
+      }
     }
 
-    return { vulnerabilities, counts }
+    return { vulnerabilities: result.vulnerabilities, counts: result.counts }
   },
   {
     default: () => ({
-      vulnerabilities: [] as VulnerabilitySummary[],
+      vulnerabilities: [],
       counts: { total: 0, critical: 0, high: 0, moderate: 0, low: 0 },
     }),
   },
 )
-
-function getSeverityLevel(vuln: OsvVulnerability): OsvSeverityLevel {
-  const dbSeverity = vuln.database_specific?.severity?.toLowerCase()
-  if (dbSeverity) {
-    if (dbSeverity === 'critical') return 'critical'
-    if (dbSeverity === 'high') return 'high'
-    if (dbSeverity === 'moderate' || dbSeverity === 'medium') return 'moderate'
-    if (dbSeverity === 'low') return 'low'
-  }
-
-  const severityEntry = vuln.severity?.[0]
-  if (severityEntry?.score) {
-    const match = severityEntry.score.match(/(?:^|[/:])(\d+(?:\.\d+)?)$/)
-    if (match?.[1]) {
-      const score = parseFloat(match[1])
-      if (score >= 9.0) return 'critical'
-      if (score >= 7.0) return 'high'
-      if (score >= 4.0) return 'moderate'
-      if (score > 0) return 'low'
-    }
-  }
-
-  return 'unknown'
-}
-
-function getVulnerabilityUrl(vuln: OsvVulnerability): string {
-  if (vuln.id.startsWith('GHSA-')) {
-    return `https://github.com/advisories/${vuln.id}`
-  }
-  const cveAlias = vuln.aliases?.find(a => a.startsWith('CVE-'))
-  if (cveAlias) {
-    return `https://nvd.nist.gov/vuln/detail/${cveAlias}`
-  }
-  return `https://osv.dev/vulnerability/${vuln.id}`
-}
-
-function toVulnerabilitySummary(vuln: OsvVulnerability): VulnerabilitySummary {
-  return {
-    id: vuln.id,
-    summary: vuln.summary || $t('package.vulnerabilities.no_description'),
-    severity: getSeverityLevel(vuln),
-    aliases: vuln.aliases || [],
-    url: getVulnerabilityUrl(vuln),
-  }
-}
 
 const hasVulnerabilities = computed(() => vulnData.value.counts.total > 0)
 
