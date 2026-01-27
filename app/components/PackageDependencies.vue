@@ -89,11 +89,11 @@ const vulnBreakdownText = computed(() => {
       :title="`${vulnerabilitySummary.affectedDeps} ${vulnerabilitySummary.affectedDeps === 1 ? 'dependency' : 'dependencies'} affected`"
     >
       <div class="flex items-center gap-2">
-        <span class="i-carbon-security w-4 h-4 shrink-0" aria-hidden="true" />
+        <span class="i-carbon-security w-4 h-4 shrink-0 self-start mt-0.5" aria-hidden="true" />
         <div>
           <div class="font-mono text-sm">
             {{ vulnerabilitySummary.totalVulns }}
-            {{ vulnerabilitySummary.totalVulns === 1 ? 'vulnerability' : 'vulnerabilities' }}
+            {{ vulnerabilitySummary.totalVulns === 1 ? 'vulnerability' : 'vulnerabilities' }} found
           </div>
           <div class="font-mono text-xs opacity-70">{{ vulnBreakdownText }}</div>
         </div>
