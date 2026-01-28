@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { PackageVulnerabilities } from '#shared/types'
+import { SEVERITY_LEVELS } from '#shared/types'
 import { SEVERITY_COLORS, SEVERITY_BADGE_COLORS, getHighestSeverity } from '#shared/utils/severity'
 
 const props = defineProps<{
@@ -42,18 +43,11 @@ const hasVulnerabilities = computed(() => vulnData.value.counts.total > 0)
 const isExpanded = shallowRef(false)
 const highestSeverity = computed(() => getHighestSeverity(vulnData.value.counts))
 
-const { $t } = useNuxtApp()
-
 const summaryText = computed(() => {
-  const counts = vulnData.value.counts
-  const parts: string[] = []
-  if (counts.critical > 0)
-    parts.push(`${counts.critical} ${$t('package.vulnerabilities.severity.critical')}`)
-  if (counts.high > 0) parts.push(`${counts.high} ${$t('package.vulnerabilities.severity.high')}`)
-  if (counts.moderate > 0)
-    parts.push(`${counts.moderate} ${$t('package.vulnerabilities.severity.moderate')}`)
-  if (counts.low > 0) parts.push(`${counts.low} ${$t('package.vulnerabilities.severity.low')}`)
-  return parts.join(', ')
+  const { counts } = vulnData.value
+  return SEVERITY_LEVELS.filter(s => counts[s] > 0)
+    .map(s => `${counts[s]} ${$t(`package.vulnerabilities.severity.${s}`)}`)
+    .join(', ')
 })
 </script>
 
@@ -122,7 +116,7 @@ const summaryText = computed(() => {
                     class="px-2 py-0.5 text-xs font-mono rounded"
                     :class="SEVERITY_BADGE_COLORS[vuln.severity]"
                   >
-                    {{ vuln.severity }}
+                    {{ $t(`package.vulnerabilities.severity.${vuln.severity}`) }}
                   </span>
                 </div>
                 <p class="text-sm text-fg-muted line-clamp-2 m-0">

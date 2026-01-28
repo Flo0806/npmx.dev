@@ -73,7 +73,7 @@ const vulnBreakdownText = computed(() => {
   if (!vulnerabilitySummary.value) return ''
   const { counts } = vulnerabilitySummary.value
   return SEVERITY_LEVELS.filter(s => counts[s])
-    .map(s => `${counts[s]} ${s}`)
+    .map(s => `${counts[s]} ${$t(`package.vulnerabilities.severity.${s}`)}`)
     .join(', ')
 })
 </script>
@@ -86,14 +86,25 @@ const vulnBreakdownText = computed(() => {
       role="alert"
       class="rounded-lg border px-4 py-3 cursor-help"
       :class="SEVERITY_COLORS[vulnerabilitySummary.severity]"
-      :title="`${vulnerabilitySummary.affectedDeps} ${vulnerabilitySummary.affectedDeps === 1 ? 'dependency' : 'dependencies'} affected`"
+      :title="
+        $t(
+          'package.vulnerabilities.deps_affected',
+          { count: vulnerabilitySummary.affectedDeps },
+          vulnerabilitySummary.affectedDeps,
+        )
+      "
     >
       <div class="flex items-center gap-2">
         <span class="i-carbon-security w-4 h-4 shrink-0 self-start mt-0.5" aria-hidden="true" />
         <div>
           <div class="font-mono text-sm">
-            {{ vulnerabilitySummary.totalVulns }}
-            {{ vulnerabilitySummary.totalVulns === 1 ? 'vulnerability' : 'vulnerabilities' }} found
+            {{
+              $t(
+                'package.vulnerabilities.deps_found',
+                { count: vulnerabilitySummary.totalVulns },
+                vulnerabilitySummary.totalVulns,
+              )
+            }}
           </div>
           <div class="font-mono text-xs opacity-70">{{ vulnBreakdownText }}</div>
         </div>
