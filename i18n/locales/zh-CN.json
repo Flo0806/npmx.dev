@@ -207,8 +207,23 @@
     "vulnerabilities": {
       "no_description": "没有可用的描述",
       "found": "{count} 个漏洞",
+      "deps_found": "{count} 个漏洞",
+      "deps_affected": "{count} 个受影响的依赖",
+      "tree_found": "在 {packages}/{total} 个包中发现 {vulns} 个漏洞",
+      "scanning_tree": "正在扫描依赖树...",
+      "show_all_packages": "显示全部 {count} 个受影响的包",
       "no_summary": "没有总结",
       "view_details": "查看漏洞详情",
+      "path": "路径",
+      "more": "+{count} 更多",
+      "packages_failed": "{count} 个包无法检查",
+      "no_known": "在 {count} 个包中未发现已知漏洞",
+      "scan_failed": "无法扫描漏洞",
+      "depth": {
+        "root": "此包",
+        "direct": "直接依赖",
+        "transitive": "间接依赖（传递性）"
+      },
       "severity": {
         "critical": "严重",
         "high": "高",

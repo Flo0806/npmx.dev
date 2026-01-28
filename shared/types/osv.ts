@@ -94,6 +94,8 @@ export interface PackageVulnerabilityInfo {
   version: string
   /** Depth in dependency tree: root (0), direct (1), transitive (2+) */
   depth: DependencyDepth
+  /** Dependency path from root package */
+  path: string[]
   vulnerabilities: VulnerabilitySummary[]
   counts: {
     total: number
@@ -116,6 +118,8 @@ export interface VulnerabilityTreeResult {
   vulnerablePackages: PackageVulnerabilityInfo[]
   /** Total packages analyzed */
   totalPackages: number
+  /** Number of packages that could not be checked (OSV query failed) */
+  failedQueries: number
   /** Aggregated counts across all packages */
   totalCounts: {
     total: number

@@ -205,8 +205,23 @@
     "vulnerabilities": {
       "no_description": "Aucune description disponible",
       "found": "{count} vulnérabilité trouvée | {count} vulnérabilités trouvées",
+      "deps_found": "{count} vulnérabilité trouvée | {count} vulnérabilités trouvées",
+      "deps_affected": "{count} dépendance affectée | {count} dépendances affectées",
+      "tree_found": "{vulns} vulnérabilité dans {packages}/{total} paquets | {vulns} vulnérabilités dans {packages}/{total} paquets",
+      "scanning_tree": "Analyse de l'arbre des dépendances...",
+      "show_all_packages": "afficher les {count} paquets affectés",
       "no_summary": "Aucun résumé",
       "view_details": "Voir les détails de la vulnérabilité",
+      "path": "chemin",
+      "more": "+{count} de plus",
+      "packages_failed": "{count} paquet n'a pas pu être vérifié | {count} paquets n'ont pas pu être vérifiés",
+      "no_known": "Aucune vulnérabilité connue dans {count} paquets",
+      "scan_failed": "Impossible d'analyser les vulnérabilités",
+      "depth": {
+        "root": "Ce paquet",
+        "direct": "Dépendance directe",
+        "transitive": "Dépendance transitive (indirecte)"
+      },
       "severity": {
         "critical": "critique",
         "high": "élevée",

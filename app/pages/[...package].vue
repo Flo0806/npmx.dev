@@ -787,6 +787,17 @@ defineOgImageComponent('Package', {
         </div>
       </section>
 
+      <!-- Vulnerability scan - full width -->
+      <div class="area-vulns">
+        <ClientOnly>
+          <PackageVulnerabilityTree
+            v-if="displayVersion"
+            :package-name="pkg.name"
+            :version="displayVersion.version"
+          />
+        </ClientOnly>
+      </div>
+
       <!-- README -->
       <section
         id="readme"
@@ -863,15 +874,6 @@ defineOgImageComponent('Package', {
 
           <!-- Download stats -->
           <PackageWeeklyDownloadStats :packageName />
-
-          <!-- Dependency Tree Vulnerabilities -->
-          <ClientOnly>
-            <PackageVulnerabilityTree
-              v-if="displayVersion"
-              :package-name="pkg.name"
-              :version="displayVersion.version"
-            />
-          </ClientOnly>
 
           <!-- Playground links -->
           <PackagePlaygrounds

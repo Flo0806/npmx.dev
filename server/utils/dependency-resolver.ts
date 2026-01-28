@@ -1,4 +1,4 @@
-import type { Packument, PackumentVersion } from '#shared/types'
+import type { Packument, PackumentVersion, DependencyDepth } from '#shared/types'
 import { maxSatisfying } from 'semver'
 
 /**
@@ -109,6 +109,8 @@ export interface ResolvedPackage {
   optional: boolean
   /** Depth level (only when trackDepth is enabled) */
   depth?: DependencyDepth
+  /** Dependency path from root (only when trackDepth is enabled) */
+  path?: string[]
 }
 
 /**
@@ -124,13 +126,14 @@ export async function resolveDependencyTree(
   const seen = new Set<string>()
 
   // Process level by level for correct depth tracking
-  let currentLevel = new Map<string, { range: string; optional: boolean }>([
-    [rootName, { range: rootVersion, optional: false }],
+  // Each entry includes the path of package names leading to this dependency
+  let currentLevel = new Map<string, { range: string; optional: boolean; path: string[] }>([
+    [rootName, { range: rootVersion, optional: false, path: [] }],
   ])
   let level = 0
 
   while (currentLevel.size > 0) {
-    const nextLevel = new Map<string, { range: string; optional: boolean }>()
+    const nextLevel = new Map<string, { range: string; optional: boolean; path: string[] }>()
 
     // Mark all packages in current level as seen before processing
     for (const name of currentLevel.keys()) {
@@ -143,7 +146,7 @@ export async function resolveDependencyTree(
       const batch = entries.slice(i, i + 20)
 
       await Promise.all(
-        batch.map(async ([name, { range, optional }]) => {
+        batch.map(async ([name, { range, optional, path }]) => {
           const packument = await fetchPackument(name)
           if (!packument) return
 
@@ -159,10 +162,14 @@ export async function resolveDependencyTree(
           const size = (versionData.dist as { unpackedSize?: number })?.unpackedSize ?? 0
           const key = `${name}@${version}`
 
+          // Build path for this package (path to parent + this package with version)
+          const currentPath = [...path, `${name}@${version}`]
+
           if (!resolved.has(key)) {
             const pkg: ResolvedPackage = { name, version, size, optional }
             if (options.trackDepth) {
               pkg.depth = level === 0 ? 'root' : level === 1 ? 'direct' : 'transitive'
+              pkg.path = currentPath
             }
             resolved.set(key, pkg)
           }
@@ -171,7 +178,7 @@ export async function resolveDependencyTree(
           if (versionData.dependencies) {
             for (const [depName, depRange] of Object.entries(versionData.dependencies)) {
               if (!seen.has(depName) && !nextLevel.has(depName)) {
-                nextLevel.set(depName, { range: depRange, optional: false })
+                nextLevel.set(depName, { range: depRange, optional: false, path: currentPath })
               }
             }
           }
@@ -180,7 +187,7 @@ export async function resolveDependencyTree(
           if (versionData.optionalDependencies) {
             for (const [depName, depRange] of Object.entries(versionData.optionalDependencies)) {
               if (!seen.has(depName) && !nextLevel.has(depName)) {
-                nextLevel.set(depName, { range: depRange, optional: true })
+                nextLevel.set(depName, { range: depRange, optional: true, path: currentPath })
               }
             }
           }

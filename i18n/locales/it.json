@@ -192,9 +192,24 @@
     },
     "vulnerabilities": {
       "no_description": "Nessuna descrizione disponibile",
-      "found": "{count} vulnerabilità trovate",
+      "found": "{count} vulnerabilità trovata | {count} vulnerabilità trovate",
+      "deps_found": "{count} vulnerabilità trovata | {count} vulnerabilità trovate",
+      "deps_affected": "{count} dipendenza interessata | {count} dipendenze interessate",
+      "tree_found": "{vulns} vulnerabilità in {packages}/{total} pacchetti | {vulns} vulnerabilità in {packages}/{total} pacchetti",
+      "scanning_tree": "Scansione dell'albero delle dipendenze...",
+      "show_all_packages": "mostra tutti i {count} pacchetti interessati",
       "no_summary": "Nessun riassunto",
       "view_details": "Vedi dettagli sulle vulnerabilitá",
+      "path": "percorso",
+      "more": "+{count} altri",
+      "packages_failed": "{count} pacchetto non ha potuto essere verificato | {count} pacchetti non hanno potuto essere verificati",
+      "no_known": "Nessuna vulnerabilità nota in {count} pacchetti",
+      "scan_failed": "Impossibile analizzare le vulnerabilità",
+      "depth": {
+        "root": "Questo pacchetto",
+        "direct": "Dipendenza diretta",
+        "transitive": "Dipendenza transitiva (indiretta)"
+      },
       "severity": {
         "critical": "critica",
         "high": "alta",

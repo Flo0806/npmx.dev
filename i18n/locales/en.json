@@ -211,10 +211,20 @@
       "deps_found": "{count} vulnerability found | {count} vulnerabilities found",
       "deps_affected": "{count} dependency affected | {count} dependencies affected",
       "tree_found": "{vulns} vulnerability in {packages}/{total} packages | {vulns} vulnerabilities in {packages}/{total} packages",
-      "scanning_tree": "Scanning dependency tree for vulnerabilities...",
+      "scanning_tree": "Scanning dependency tree...",
       "show_all_packages": "show all {count} affected packages",
       "no_summary": "No summary",
       "view_details": "View vulnerability details",
+      "path": "path",
+      "more": "+{count} more",
+      "packages_failed": "{count} package could not be checked | {count} packages could not be checked",
+      "no_known": "No known vulnerabilities in {count} packages",
+      "scan_failed": "Could not scan for vulnerabilities",
+      "depth": {
+        "root": "This package",
+        "direct": "Direct dependency",
+        "transitive": "Transitive dependency (indirect)"
+      },
       "severity": {
         "critical": "critical",
         "high": "high",
