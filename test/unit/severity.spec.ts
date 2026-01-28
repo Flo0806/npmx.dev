@@ -20,16 +20,16 @@ describe('severity utils', () => {
       expect(SEVERITY_COLORS.critical).toContain('red')
     })
 
-    it('high has orange colors', () => {
-      expect(SEVERITY_COLORS.high).toContain('orange')
+    it('high has red colors', () => {
+      expect(SEVERITY_COLORS.high).toContain('red')
     })
 
-    it('moderate has yellow colors', () => {
-      expect(SEVERITY_COLORS.moderate).toContain('yellow')
+    it('moderate has orange colors', () => {
+      expect(SEVERITY_COLORS.moderate).toContain('orange')
     })
 
-    it('low has blue colors', () => {
-      expect(SEVERITY_COLORS.low).toContain('blue')
+    it('low has yellow colors', () => {
+      expect(SEVERITY_COLORS.low).toContain('yellow')
     })
   })
 

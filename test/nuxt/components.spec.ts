@@ -77,7 +77,6 @@ import ClaimPackageModal from '~/components/ClaimPackageModal.vue'
 import OperationsQueue from '~/components/OperationsQueue.vue'
 import PackageList from '~/components/PackageList.vue'
 import PackageMetricsBadges from '~/components/PackageMetricsBadges.vue'
-import PackageVulnerabilities from '~/components/PackageVulnerabilities.vue'
 import PackageAccessControls from '~/components/PackageAccessControls.vue'
 import OrgMembersPanel from '~/components/OrgMembersPanel.vue'
 import OrgTeamsPanel from '~/components/OrgTeamsPanel.vue'
@@ -809,19 +808,6 @@ describe('component accessibility audits', () => {
         props: {
           packageName: 'vue',
           version: '3.5.0',
-        },
-      })
-      const results = await runAxe(component)
-      expect(results.violations).toEqual([])
-    })
-  })
-
-  describe('PackageVulnerabilities', () => {
-    it('should have no accessibility violations', async () => {
-      const component = await mountSuspended(PackageVulnerabilities, {
-        props: {
-          packageName: 'lodash',
-          version: '4.17.21',
         },
       })
       const results = await runAxe(component)
