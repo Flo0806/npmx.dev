@@ -431,7 +431,7 @@ describe('component accessibility audits', () => {
   describe('PackageDependencies', () => {
     it('should have no accessibility violations without dependencies', async () => {
       const component = await mountSuspended(PackageDependencies, {
-        props: { packageName: 'test-package' },
+        props: { packageName: 'test-package', version: '1.0.0' },
       })
       const results = await runAxe(component)
       expect(results.violations).toEqual([])
@@ -441,6 +441,7 @@ describe('component accessibility audits', () => {
       const component = await mountSuspended(PackageDependencies, {
         props: {
           packageName: 'test-package',
+          version: '1.0.0',
           dependencies: {
             vue: '^3.0.0',
             lodash: '^4.17.0',
@@ -455,6 +456,7 @@ describe('component accessibility audits', () => {
       const component = await mountSuspended(PackageDependencies, {
         props: {
           packageName: 'test-package',
+          version: '1.0.0',
           peerDependencies: {
             vue: '^3.0.0',
           },
