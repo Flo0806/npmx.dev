@@ -184,7 +184,8 @@ function slugify(text: string): string {
 function resolveUrl(url: string, packageName: string, repoInfo?: RepositoryInfo): string {
   if (!url) return url
   if (url.startsWith('#')) {
-    return url
+    // Prefix anchor links to match heading IDs (avoids collision with page IDs)
+    return `#user-content-${url.slice(1)}`
   }
   if (hasProtocol(url, { acceptRelative: true })) {
     try {
@@ -292,7 +293,11 @@ export async function renderReadmeHtml(
     // Handle duplicate slugs (GitHub-style: foo, foo-1, foo-2)
     const count = usedSlugs.get(slug) ?? 0
     usedSlugs.set(slug, count + 1)
-    const id = count === 0 ? slug : `${slug}-${count}`
+    const uniqueSlug = count === 0 ? slug : `${slug}-${count}`
+
+    // Prefix with 'user-content-' to avoid collisions with page IDs
+    // (e.g., #install, #dependencies, #versions are used by the package page)
+    const id = `user-content-${uniqueSlug}`
 
     return `<h${semanticLevel} id="${id}" data-level="${depth}">${text}</h${semanticLevel}>\n`
   }
