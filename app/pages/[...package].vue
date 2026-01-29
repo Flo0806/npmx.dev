@@ -85,13 +85,13 @@ const displayVersion = computed(() => {
   return pkg.value.versions[latestTag] ?? null
 })
 
-// Fetch vulnerability tree (lazy, client-side)
-// This is the same composable used by PackageVulnerabilityTree
+// Fetch dependency analysis (lazy, client-side)
+// This is the same composable used by PackageVulnerabilityTree and PackageDeprecatedTree
 const {
   data: vulnTree,
   status: vulnTreeStatus,
   fetch: fetchVulnTree,
-} = useVulnerabilityTree(packageName, () => displayVersion.value?.version ?? '')
+} = useDependencyAnalysis(packageName, () => displayVersion.value?.version ?? '')
 onMounted(() => {
   // Fetch vulnerability tree once displayVersion is available
   if (displayVersion.value) {
@@ -1190,6 +1190,12 @@ defineOgImageComponent('Package', {
             v-if="displayVersion"
             :package-name="pkg.name"
             :version="displayVersion.version"
+          />
+          <PackageDeprecatedTree
+            v-if="displayVersion"
+            :package-name="pkg.name"
+            :version="displayVersion.version"
+            class="mt-3"
           />
         </ClientOnly>
       </div>
