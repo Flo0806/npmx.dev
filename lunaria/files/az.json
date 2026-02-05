@@ -288,8 +288,7 @@
         "high": "yüksək",
         "moderate": "orta",
         "low": "aşağı"
-      },
-      "fixed_in_title": "{version} versiyasında düzəldilib"
+      }
     },
     "deprecated": {
       "label": "Köhnəlmiş",

@@ -328,8 +328,7 @@
         "high": "عالية",
         "moderate": "متوسطة",
         "low": "منخفضة"
-      },
-      "fixed_in_title": "تم الإصلاح في الإصدار {version}"
+      }
     },
     "deprecated": {
       "label": "مهمل",
