@@ -23,7 +23,7 @@ watch(
   [status, error],
   ([newStatus, newError]) => {
     if (newStatus === 'error' && newError?.statusCode === 404) {
-      throw createError({
+      showError({
         statusCode: 404,
         statusMessage: $t('org.page.not_found'),
         message: $t('org.page.not_found_message', { name: orgName.value }),
