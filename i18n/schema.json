@@ -1128,6 +1128,9 @@
                 }
               },
               "additionalProperties": false
+            },
+            "fixed_in_title": {
+              "type": "string"
             }
           },
           "additionalProperties": false
